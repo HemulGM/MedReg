@@ -1,5 +1,7 @@
 program MedUtils;
 
+{$R *.dres}
+
 uses
   Vcl.Forms,
   MedUtils.Main in 'MedUtils.Main.pas' {FormMain};

@@ -6,7 +6,8 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
   Vcl.StdCtrls, Vcl.ExtCtrls, HGM.Controls.PanelExt, HGM.Button,
-  System.ImageList, Vcl.ImgList, Vcl.ComCtrls;
+  System.ImageList, Vcl.ImgList, Vcl.ComCtrls, RVStyle, RVScroll, RichView,
+  Vcl.Menus;
 
 type
   TFormMain = class(TForm)
@@ -60,6 +61,28 @@ type
     Label21: TLabel;
     EditDate_Result: TEdit;
     EditIMT_Height: TEdit;
+    PageControlMain: TPageControl;
+    TabSheetCalcs: TTabSheet;
+    Panel2: TPanel;
+    ButtonFlatMenuCalcs: TButtonFlat;
+    ButtonFlatMenuHelp: TButtonFlat;
+    ButtonFlatMenuFile: TButtonFlat;
+    TabSheetHelp: TTabSheet;
+    Panel3: TPanel;
+    ButtonFlat1: TButtonFlat;
+    ButtonFlat2: TButtonFlat;
+    ButtonFlat3: TButtonFlat;
+    ButtonFlat4: TButtonFlat;
+    ButtonFlat5: TButtonFlat;
+    ButtonFlat6: TButtonFlat;
+    ButtonFlat7: TButtonFlat;
+    ButtonFlat8: TButtonFlat;
+    ButtonFlat9: TButtonFlat;
+    ButtonFlat10: TButtonFlat;
+    RichEdit1: TRichView;
+    RVStyle1: TRVStyle;
+    PopupMenuFile: TPopupMenu;
+    MenuItemExit: TMenuItem;
     procedure DrawPanel1Paint(Sender: TObject);
     procedure CheckBoxCKD_MClick(Sender: TObject);
     procedure CheckBoxCKD_WClick(Sender: TObject);
@@ -70,7 +93,14 @@ type
     procedure ButtonFlatIMT_CalcClick(Sender: TObject);
     procedure ButtonFlatIPL_CalcClick(Sender: TObject);
     procedure ButtonFlatDate_CalcClick(Sender: TObject);
-  private
+
+    procedure FormCreate(Sender: TObject);
+    procedure ButtonFlatMenuHelpClick(Sender: TObject);
+    procedure ButtonFlatMenuCalcsClick(Sender: TObject);
+    procedure ButtonFlat1Click(Sender: TObject);
+    procedure ButtonFlatMenuFileClick(Sender: TObject);
+    procedure MenuItemExitClick(Sender: TObject);  private
+    procedure Navigate(Tab: TTabSheet);
     { Private declarations }
   public
     { Public declarations }
@@ -107,6 +137,16 @@ uses
 
 
 
+procedure TFormMain.ButtonFlat1Click(Sender: TObject);
+var Stream: TResourceStream;
+begin
+  Stream := TResourceStream.Create(HInstance, 'Help'+IntToStr((Sender as TButtonFlat).Tag), RT_RCDATA);
+  RichEdit1.ClearAll;
+  RichEdit1.LoadRTFFromStream(Stream);
+  RichEdit1.ReformatAll;
+  Stream.Free;
+end;
+
 procedure TFormMain.ButtonFlatDate_CalcClick(Sender: TObject);
 begin
   EditDate_Result.Text := DaysBetween(DateTimePickerDate_S.Date, DateTimePickerDate_E.Date).ToString;
@@ -135,6 +175,41 @@ end;
 procedure TFormMain.ButtonFlatIPL_CalcClick(Sender: TObject);
 begin
   EditIPL_Result.Text := FormatFloat('0.000', (StrToFloat(EditIPL_Count.Text) * StrToFloat(EditIPL_Exp.Text)) / 20);
+end;
+
+procedure TFormMain.Navigate(Tab: TTabSheet);
+
+  procedure SetMenuButtonActive(Button: TButtonFlat; Value: Boolean);
+  begin
+    case Value of
+      True:
+        Button.ColorNormal := clWhite;
+      False:
+        Button.ColorNormal := $00F7F6F5;
+    end;
+  end;
+
+begin
+  PageControlMain.ActivePage := Tab;
+  SetMenuButtonActive(ButtonFlatMenuCalcs, PageControlMain.ActivePage = TabSheetCalcs);
+  SetMenuButtonActive(ButtonFlatMenuHelp, PageControlMain.ActivePage = TabSheetHelp);
+end;
+
+procedure TFormMain.ButtonFlatMenuCalcsClick(Sender: TObject);
+begin
+  Navigate(TabSheetCalcs);
+end;
+
+procedure TFormMain.ButtonFlatMenuFileClick(Sender: TObject);
+var PT: TPoint;
+begin
+  PT := ButtonFlatMenuFile.ClientToScreen(Point(0, 0));
+  PopupMenuFile.Popup(PT.X, PT.Y + ButtonFlatMenuFile.Height);
+end;
+
+procedure TFormMain.ButtonFlatMenuHelpClick(Sender: TObject);
+begin
+  Navigate(TabSheetHelp);
 end;
 
 procedure TFormMain.ButtonFlatSKD_CalcClick(Sender: TObject);
@@ -285,6 +360,20 @@ begin
     Rectangle(R);
   end;
 
+end;
+
+procedure TFormMain.FormCreate(Sender: TObject);
+var
+  i: Integer;
+begin
+  for i := 0 to PageControlMain.PageCount-1 do
+    PageControlMain.Pages[i].TabVisible := False;
+  Navigate(TabSheetCalcs);
+end;
+
+procedure TFormMain.MenuItemExitClick(Sender: TObject);
+begin
+  Application.Terminate;
 end;
 
 end.
